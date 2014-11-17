@@ -2,7 +2,7 @@ Commands
 ========
 
 
-Start hacking with ``nh`` command:
+Start hacking with ``hn`` command:
 
 .. runblock:: console
 
