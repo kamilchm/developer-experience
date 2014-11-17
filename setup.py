@@ -27,7 +27,7 @@ setup(
         'Programming Language :: Python :: 2.7',
     ],
     packages=find_packages(),
-    setup_requires=['setuptools>=2.2'] + required_dev,
+    setup_requires=required_dev,
     install_requires=required,
     entry_points={
         'console_scripts': [

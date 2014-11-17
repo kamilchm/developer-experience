@@ -1,5 +1,8 @@
 include README.md
 include requirements.txt
+include requirements-dev.txt
+include requirements-docs.txt
+include hncli/_version.py
 
 recursive-exclude * __pycache__
 recursive-exclude * *.py[co]
