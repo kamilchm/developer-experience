@@ -154,7 +154,7 @@ Commands:
 import click
 
 @click.group()
-*def cli():
+def hncli():
     """ HackerNews CLI - for hackers """
     pass
 ```
@@ -162,7 +162,7 @@ import click
 --
 
 ```python
-*@cli.command()
+@hncli.command()
 def stories()
     """ list stories """
     pass
@@ -171,7 +171,7 @@ def stories()
 --
 
 ```python
-*@cli.command()
+@hncli.command()
 def go()
     """ go to the story on HackerNews """
     pass
@@ -180,10 +180,8 @@ def go()
 --
 
 ```python
-*@cli.command()
-def comments()
-    """ show comments for the story """
-    pass
+if __name__ == '__main__':
+    hncli()
 ```
 
 ---
@@ -544,6 +542,7 @@ class: center, middle
 ## How do I make sure my new features didn't break old functionality?
 
 ---
+class: center, middle
 
 # CI, CI, CI, ... CD!
 
@@ -577,7 +576,15 @@ class: middle, center
     <script src="//gnab.github.io/remark/downloads/remark-latest.min.js">
     </script>
     <script>
-      var slideshow = remark.create();
+      var slideshow = remark.create({
+          ratio: '16:9',
+          navigation: {
+            scroll: true,
+            touch: true,
+            click: false
+          },
+          highlightStyle: 'sunburst'
+        });
     </script>
   </body>
 </html>
