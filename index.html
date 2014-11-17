@@ -8,13 +8,23 @@
       @import url(//fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
       @import url(//fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
 
-      body { font-family: 'Droid Serif'; }
+      body {
+        font-family: 'Droid Serif';
+      }
       h1, h2, h3 {
         font-family: 'Yanone Kaffeesatz';
-        font-weight: normal;
+        font-weight: 400;
+        margin-bottom: 0;
+      }
+      .remark-slide-content {
+        font-size: 1.8em;
       }
       .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+      a {
+        text-decoration: none;
+      }
       .footnote {
+        font-size: 20px;
         position: absolute;
         bottom: 3em;
         right: 3em;
@@ -409,7 +419,7 @@ cfg3 = anyconfig.load(["/etc/hn/*.yaml"], merge=MS_DICTS_AND_LISTS)
 
 ## create intelligent and beautiful documentation
 
-* easy publishing http://pythonhosted.org//hackernews-cli/
+* easy publishing http://pythonhosted.org/hackernews-cli/
 * waiting for [autodoc - click integration](https://github.com/mitsuhiko/click/pull/234)
 * workaround with [sphinxcontrib-autorun](https://pypi.python.org/pypi/sphinxcontrib-autorun)
 
