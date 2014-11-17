@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Developer Experience</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <style type="text/css">
+      @import url(//fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(//fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(//fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+      .footnote {
+        position: absolute;
+        bottom: 3em;
+        right: 3em;
+      }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle
+
+# Developer Experience
+
+## building tools for developers
+
+.footnote[[Kamil Chmielewski](https://github.com/kamilchm)]
+
+---
+
+# About Me
+
+* 10+ years of professional experience
+* developer, architect, team leader, product owner
+* C/C++, FoxPro, Python, Java, Groovy for production
+* Python, Go, Erlang, Nimrod for fun
+* pragmatic programmer, continuous delivery practitioner
+* I like programming, but hate writing code
+
+---
+
+# What Makes A Good Developer Tool?
+
+* Build apps better, faster, stronger.
+  * https://github.com/showcases/software-development-tools
+* Build software faster with fewer headaches.
+  * https://github.com/showcases/productivity-tools
+* These tools help you manage servers and deploy happier and more often with more confidence.
+  * https://github.com/showcases/devops-tools
+
+---
+
+# command-line tool that helps you
+
+* git
+* pip
+* make
+* grep
+
+---
+
+# starts with install & usage
+
+![UglifyJS installation](uglifyjs_install.png)
+
+![UglifyJS usage](uglifyjs_usage.png)
+
+
+---
+
+# configurable
+
+* ~/.pypirc, ~/.gitconfig, tox.ini
+* .travis.yaml, playbook.yaml
+* package.json, Gruntfile
+* settings.xml
+
+---
+
+class: center, middle
+
+# How to Build One
+
+## with Python
+
+---
+
+# HackerNews CLI
+
+* list **strories**
+  * **sort_by** - `newest` or `best`
+  * **limit** - number of top stories to show
+* **go** to the linked story
+* print **comments** for story
+* **comment** story on [HackerNews](https://news.ycombinator.com/)
+
+.footnote[using [HackerNewsAPI](https://github.com/karan/HackerNewsAPI)]
+
+---
+
+# Usage
+
+```bash
+$ hn
+Usage: hn [OPTIONS] COMMAND [ARGS]...
+
+  HackerNews CLI - for hackers
+
+Options:
+  --version  Show the version and exit.
+  --help     Show this message and exit.
+
+Commands:
+  comment   comment story on HackerNews
+  comments  show comments for the story
+  go        go to the story on HackerNews
+  stories   list stories
+```
+
+---
+
+# Click
+
+## creating beautiful command line interfaces
+
+* arbitrary nesting of commands
+* automatically generates nicely formatted help pages
+* parameter types with different behavior
+* test functionality CLIs and check their behavior
+* batteries included
+
+.footnote[http://click.pocoo.org/]
+
+---
+
+# Listing Stories
+
+```python
+@cli.command()
+@click.option('--sort_by', '-s', default='newest',
+              type=click.Choice(['newest', 'best']), help='sort type')
+@click.option('--limit', '-l', default=10, type=click.INT,
+              help='number of top stories to show')
+def stories(sort_by, limit):
+    """ list stories """
+    stories = hn.get_stories(story_type=sort_by, limit=limit)
+
+    if stories:
+        echo(style('      when      | comments |   id    | title', fg='yellow'))
+    else:
+        echo(style('no stories found!', fg='red'))
+
+    for story in stories:
+        echo(style(story.published_time.center(15), fg='magenta') + ' | ', nl=False)
+        echo(style(str(story.num_comments).center(10), fg='red') + ' | ', nl=False)
+        echo(style(str(story.story_id), fg='green') + ' | ', nl=False)
+        echo(style(story.title, fg='white'))
+```
+
+---
+
+# hn stories usage
+
+```bash
+$ hn stories --help
+Usage: hn stories [OPTIONS]
+
+  list stories
+
+Options:
+  -s, --sort_by [newest|best]  sort type
+  -l, --limit INTEGER          number of top stories to show
+  --help                       Show this message and exit.
+```
+
+---
+
+# hn stories example
+
+```bash
+$ hn stories
+      when      | comments |   id    | title
+ 6 minutes ago  |    0     | 8616607 | Ask HN: How should I use mTurk to advertise my product?
+ 7 minutes ago  |    0     | 8616600 | Ask HN: Can You Recommend an Online Mentoring Service?
+ 8 minutes ago  |    0     | 8616597 | Cornell's robot chef learns, cooks to your taste preferences
+ 8 minutes ago  |    1     | 8616595 | Show HN: tl;dr{Code} Project from HackRPI hackathon
+ 15 minutes ago |    0     | 8616580 | US State Department shuts down email due to hackers
+ 27 minutes ago |    0     | 8616550 | Smile, You’re Speaking Emoji: The rapid evolution of a wordless tongue
+ 30 minutes ago |    0     | 8616541 | Payment Systems Adventures – Part II
+ 33 minutes ago |    0     | 8616537 | A Case for Spreadsheets
+ 40 minutes ago |    0     | 8616513 | Learning AngularJS: How to make an API call using factories
+ 41 minutes ago |    0     | 8616510 | Journalists + EBay Billionaire = Chaos
+```
+
+--
+
+## with arguments ...
+
+```bash
+$ hn stories -s best -l 2
+      when      | comments |   id    | title
+   4 days ago   |    890   | 8595905 | Microsoft takes .NET open source and cross-platform
+   3 days ago   |    558   | 8600716 | Letter to Amazon Board from Fired Ad Exec
+```
+
+---
+
+# Printing comments
+
+```python
+@cli.command()
+@click.argument('story_id', type=click.INT, required=True)
+def comments(story_id):
+    """ show comments for the story """
+    comments = Story.fromid(story_id).get_comments()
+
+    if not comments:
+        echo(style('no coments for story found!', fg='red'))
+
+    for comment in comments:
+        echo(style(comment.time_ago.center(15), fg='magenta'), nl=False)
+        echo('by ' + style(str(comment.user), fg='cyan'))
+        echo(comment.body)
+```
+
+--
+
+```bash
+$ hn comments --help
+Usage: hn comments [OPTIONS] STORY_ID
+
+  show comments for the story
+
+Options:
+  --help  Show this message and exit.
+```
+
+---
+
+# Entry Points FTW!
+## instead of using Unix shebangs
+
+* works with Windows
+* virtualenv support
+* CLI as API
+
+--
+
+## configure ``setup.py``
+
+```python
+setup(
+    entry_points={
+        'console_scripts': [
+            'hn = hncli.cli:cli',
+        ],
+    },
+```
+
+---
+
+# More Power with Click
+
+* parameter types
+  * [click.File](http://click.pocoo.org/3/api/#click.File),
+    [click.Path](http://click.pocoo.org/3/api/#click.Path)
+  * [custom types](http://click.pocoo.org/3/parameters/#implementing-custom-types)
+* [input propmts](http://click.pocoo.org/3/prompts/#input-prompts),
+  [password prompts](http://click.pocoo.org/3/options/#password-prompts)
+* [values from environment variables](http://click.pocoo.org/3/options/#values-from-environment-variables)
+* multi commands
+  * [from plugins](http://click.pocoo.org/3/commands/#custom-multi-commands)
+  * [chaining](http://click.pocoo.org/3/commands/#multi-command-chaining),
+    [pipelines](http://click.pocoo.org/3/commands/#multi-command-pipelines)
+
+---
+
+# ... and even more
+
+* [testing](http://click.pocoo.org/3/testing/#testing-click-applications) with
+  [file system isolation](http://click.pocoo.org/3/testing/#file-system-isolation) and
+  [prompts](http://click.pocoo.org/3/testing/#input-streams)
+* [printing to stdout](http://click.pocoo.org/3/utils/#printing-to-stdout) with
+  [ANSI colors](http://click.pocoo.org/3/utils/#ansi-colors) and
+  [pager support](http://click.pocoo.org/3/utils/#pager-support)
+* launching [editors](http://click.pocoo.org/3/utils/#launching-editors) and
+  [applications](http://click.pocoo.org/3/utils/#launching-applications)
+* showing [progress bars](http://click.pocoo.org/3/utils/#showing-progress-bars)
+* support for [Bash completion](http://click.pocoo.org/3/bashcomplete/)
+* finding [application folers](http://click.pocoo.org/3/utils/#finding-application-folders)
+
+---
+
+# anyconfig
+
+## configuration files in any formats
+
+* JSON w/ json or simplejson
+* YAML w/ PyYAML
+* Ini w/ configparser
+* XML w/ lxml or ElementTree (experimental)
+
+.footnote[https://github.com/ssato/python-anyconfig]
+
+---
+
+# ... and many places
+
+```python
+cfg1 = anyconfig.load(["/etc/hn/hn.ini", "~/hn.ini"], merge=MS_REPLACE)
+```
+
+--
+
+## mixed formats
+
+```python
+cfg2 = anyconfig.load(["/etc/hn/hn.ini", "~/hn.json"], merge=MS_DICTS)
+```
+
+--
+
+## load all and merge
+
+```python
+cfg3 = anyconfig.load(["/etc/hn/*.yaml"], merge=MS_DICTS_AND_LISTS)
+```
+
+---
+
+# Sphinx
+
+## create intelligent and beautiful documentation
+
+* easy publishing with https://readthedocs.org/
+* waiting for [autodoc - click integration](https://github.com/mitsuhiko/click/pull/234)
+* workaround with [sphinxcontrib-autorun](https://pypi.python.org/pypi/sphinxcontrib-autorun)
+
+.footnote[http://sphinx-doc.org/]
+
+---
+
+# ... and write docs only once
+
+```rst
+.. runblock:: console
+
+    $ hn comment --help
+```
+
+--
+
+## renders to
+
+```bash
+$ hn comment --help
+Usage: hn comment [OPTIONS] STORY_ID
+
+  comment story on HackerNews
+
+Options:
+  --help  Show this message and exit.
+```
+
+---
+
+# vcversioner
+
+## version numbers from version control
+
+.footnote[https://github.com/habnabit/vcversioner]
+
+--
+
+### configured in ``setup.py``
+
+```python
+setup(
+    vcversioner={
+        'version_module_paths': ['hncli/_version.py'],
+    },
+```
+
+--
+
+```python
+from hncli._version import __version__
+```
+
+---
+
+# Python Packaging
+
+## hate, hate, hate everywhere
+
+```bash
+$ pip install hackernews-cli
+```
+
+.footnote[http://lucumr.pocoo.org/2012/6/22/hate-hate-hate-everywhere/]
+
+???
+error: could not create '/usr/local/lib/python2.7/dist-packages/': Permission denied
+
+--
+
+```bash
+$ sudo pip install hackernews-cli
+```
+
+???
+wrong global version of requests :/
+
+--
+
+```bash
+$ sudo pip install virtualenv
+$ virtualenv hackernews-cli
+$ source hackernews-cli/bin/activate
+$ pip install hackernews-cli
+$ ln -s hackernews-cli/bin/hn ~/bin/hn
+```
+
+---
+
+# PEX
+
+## self-contained executable Python virtual environments
+
+```bash
+inside_pex$ tree -L 2 -a
+.
+├── .bootstrap
+│   ├── _markerlib
+│   ├── _pex
+│   └── pkg_resources.py
+├── .deps
+│   ├── anyconfig-0.0.5-py2-none-any.whl
+│   ├── beautifulsoup4-4.3.2-py2-none-any.whl
+│   ├── click-3.3-py2.py3-none-any.whl
+│   ├── HackerNews-2.0.0-py2-none-any.whl
+│   ├── hackernews_cli-0.0.1-py2-none-any.whl
+│   └── requests-2.4.3-py2.py3-none-any.whl
+├── __main__.py
+└── PEX-INFO
+```
+
+.footnote[http://pex.rtfd.org/]
+
+---
+
+class: center, middle
+
+# Contributor Experience
+
+---
+
+# Develop, Test and Build
+
+## How do I get up and running in development?
+
+## How do I make sure my new features didn't break old functionality?
+
+---
+
+# CI, CI, CI, ... CD!
+
+![Failed build in Travis CI](failing_travis.png)
+
+---
+
+# Argue for Code Style
+
+![PR Review with PEP8 requirements](pep8_comment.png)
+
+???
+automation!
+
+--
+
+## Prospector
+
+### analyse Python code and output information about errors, potential problems, convention violations and complexity
+
+.footnote[https://github.com/landscapeio/prospector]
+
+---
+class: middle, center
+
+# [github.com/](https://github.com/kamilchm/developer-experience)
+# [kamilchm/](https://github.com/kamilchm/developer-experience)
+# [developer-experience](https://github.com/kamilchm/developer-experience)
+
+    </textarea>
+    <script src="//gnab.github.io/remark/downloads/remark-latest.min.js">
+    </script>
+    <script>
+      var slideshow = remark.create();
+    </script>
+  </body>
+</html>
