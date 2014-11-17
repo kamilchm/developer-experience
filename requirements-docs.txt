@@ -2,5 +2,4 @@ sphinx>=1.2.3
 alabaster>=0.6.1
 sphinxcontrib-autorun>=0.1-20140415
 releases>=0.7.0
-setuptools>=2.2
 -e .
