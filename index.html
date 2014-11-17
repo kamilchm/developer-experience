@@ -138,6 +138,46 @@ Commands:
 
 ---
 
+# Group of commands
+
+```python
+import click
+
+@click.group()
+*def cli():
+    """ HackerNews CLI - for hackers """
+    pass
+```
+
+--
+
+```python
+*@cli.command()
+def stories()
+    """ list stories """
+    pass
+```
+
+--
+
+```python
+*@cli.command()
+def go()
+    """ go to the story on HackerNews """
+    pass
+```
+
+--
+
+```python
+*@cli.command()
+def comments()
+    """ show comments for the story """
+    pass
+```
+
+---
+
 # Listing Stories
 
 ```python
@@ -148,23 +188,12 @@ Commands:
               help='number of top stories to show')
 def stories(sort_by, limit):
     """ list stories """
-    stories = hn.get_stories(story_type=sort_by, limit=limit)
-
-    if stories:
-        echo(style('      when      | comments |   id    | title', fg='yellow'))
-    else:
-        echo(style('no stories found!', fg='red'))
-
-    for story in stories:
-        echo(style(story.published_time.center(15), fg='magenta') + ' | ', nl=False)
-        echo(style(str(story.num_comments).center(10), fg='red') + ' | ', nl=False)
-        echo(style(str(story.story_id), fg='green') + ' | ', nl=False)
-        echo(style(story.title, fg='white'))
+    pass
 ```
 
----
+--
 
-# hn stories usage
+## usage
 
 ```bash
 $ hn stories --help
@@ -199,13 +228,34 @@ $ hn stories
 
 --
 
-## with arguments ...
+## with options ...
 
 ```bash
-$ hn stories -s best -l 2
+$ hn stories --sort_by best --limit 2
       when      | comments |   id    | title
    4 days ago   |    890   | 8595905 | Microsoft takes .NET open source and cross-platform
    3 days ago   |    558   | 8600716 | Letter to Amazon Board from Fired Ad Exec
+```
+
+---
+
+# automatic validation
+
+```bash
+$ hn stories --limit aa
+Usage: hn stories [OPTIONS]
+
+Error: Invalid value for "--limit" / "-l": aa is not a valid integer
+```
+
+--
+
+```bash
+$ hn stories -l 3 -s fame
+Usage: hn stories [OPTIONS]
+
+Error: Invalid value for "--sort_by" / "-s": invalid choice: fame.
+(choose from newest, best)
 ```
 
 ---
@@ -296,6 +346,28 @@ setup(
 
 ---
 
+# JSON vs YAML vs XML vs INI vs TOML vs ...
+
+--
+
+JSON5 is a proposed extension to JSON
+
+(https://news.ycombinator.com/item?id=7325735)
+
+--
+
+* JSON5
+
+--
+
+* OGDL
+
+--
+
+* CSON
+
+---
+
 # anyconfig
 
 ## configuration files in any formats
@@ -337,7 +409,7 @@ cfg3 = anyconfig.load(["/etc/hn/*.yaml"], merge=MS_DICTS_AND_LISTS)
 
 ## create intelligent and beautiful documentation
 
-* easy publishing with https://readthedocs.org/
+* easy publishing http://pythonhosted.org//hackernews-cli/
 * waiting for [autodoc - click integration](https://github.com/mitsuhiko/click/pull/234)
 * workaround with [sphinxcontrib-autorun](https://pypi.python.org/pypi/sphinxcontrib-autorun)
 
@@ -435,10 +507,6 @@ $ ln -s hackernews-cli/bin/hn ~/bin/hn
 ```bash
 inside_pex$ tree -L 2 -a
 .
-├── .bootstrap
-│   ├── _markerlib
-│   ├── _pex
-│   └── pkg_resources.py
 ├── .deps
 │   ├── anyconfig-0.0.5-py2-none-any.whl
 │   ├── beautifulsoup4-4.3.2-py2-none-any.whl
@@ -446,8 +514,7 @@ inside_pex$ tree -L 2 -a
 │   ├── HackerNews-2.0.0-py2-none-any.whl
 │   ├── hackernews_cli-0.0.1-py2-none-any.whl
 │   └── requests-2.4.3-py2.py3-none-any.whl
-├── __main__.py
-└── PEX-INFO
+└── __main__.py
 ```
 
 .footnote[http://pex.rtfd.org/]
