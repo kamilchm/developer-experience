@@ -1,3 +1,4 @@
+setuptools>=2.2
 wheel>=0.24.0
 pex>=0.7.0
 vcversioner>=2.14.0
