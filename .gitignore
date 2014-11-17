@@ -1,0 +1,8 @@
+*.egg/
+/.idea/
+*.pyc
+/.ropeproject/
+/build/
+/dist/
+*.egg-info/
+/hncli/_version.py
